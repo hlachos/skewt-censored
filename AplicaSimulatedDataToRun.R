@@ -10,7 +10,7 @@ source("Envelopes.R")
 ### Simulated Data
 ################################################################################
 library(mixsmsn)
-n<-1000
+n<-200
 x<-cbind(1, runif(n,1,5), runif(n,0,1))
 y<-matrix(0,n,1)
 betas1<-c(1,2,3)
@@ -32,16 +32,10 @@ cc=matrix(1,n,1)*(y<=cutof)
 y[cc==1]=cutof
 
 
-est_ST.EM <- EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="ST")
-est_SN.EM <- EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="SN")
-est_T.EM <- EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="T")
-est_N.EM <- EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="N")
-
-par(mfrow = c(2, 2))
-EnvelopeRMT(est_ST.EM$theta,y,x,cc,family="ST")
-EnvelopeRMT(c(est_SN.EM$theta),y,x,cc,family="SN")
-EnvelopeRMT(c(est_T.EM$theta),y,x,cc,family="ST")
-EnvelopeRMT(c(est_N.EM$theta,0),y,x,cc,family="SN")
+est_ST.EM <- EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="ST")
+est_SN.EM <- EM.skewCens(cc, x, y, get.init = TRUE,  show.envelope="FALSE", error = 0.00001, iter.max = 300, family="SN")
+est_T.EM <- EM.skewCens(cc, x, y, get.init = TRUE,  show.envelope="FALSE", error = 0.00001, iter.max = 300, family="T")
+est_N.EM <- EM.skewCens(cc, x, y, get.init = TRUE,  show.envelope="FALSE", error = 0.00001, iter.max = 300, family="N")
 
 
 ################################################################################
@@ -76,12 +70,11 @@ x <- cbind(wage.rates$age,wage.rates$educ,wage.rates$kidslt6,wage.rates$kidsge6)
 cc<- c(rep(0,428),rep(1,325))
 ##Fits a left censored Student-t model to the data
 
-est_N <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="N")
-EnvelopeRMT(c(est_N$theta,0),y,x,cc,family="SN")
-est_T <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="T")
-EnvelopeRMT(est_T$theta,y,x,cc,family="ST")
-est_ST <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="ST")
-EnvelopeRMT(est_ST$theta,y,x,cc,family="ST")
+est_N <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="N")
+est_T <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="T")
+est_SN <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="SN")
+est_ST <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="ST")
+
 
 
 ## library SMNCensReg  : symmetric distribution only
@@ -104,14 +97,10 @@ x1 <- dados[,3]/1000
 x <- cbind(1,x1)
 
 
-est_N <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="N")
-EnvelopeRMT(c(est_N$theta,0),y,x,cc,family="SN")
-est_T <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="T")
-EnvelopeRMT(est_T$theta,y,x,cc,family="ST")
-est_ST <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.0001, iter.max = 300, family="ST")
-EnvelopeRMT(est_ST$theta,y,x,cc,family="ST")
-est_SN <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="SN")
-EnvelopeRMT(est_SN$theta,y,x,cc,family="SN")
+est_N <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="N")
+est_T <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.00001, iter.max = 300, family="T")
+est_ST <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.0001, iter.max = 300, family="ST")
+est_SN <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="SN")
 
 ### symmetric distribution only
 
@@ -132,12 +121,9 @@ cc <- c(rep(0,428),rep(1,325))
 n <- length(y)
 
 
-est_N <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="N")
-EnvelopeRMT(c(est_N$theta,0),y,x,cc,family="SN")
-est_T <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="T")
-EnvelopeRMT(est_T$theta,y,x,cc,family="ST")
-est_ST <-EM.skewCens(cc, x, y, get.init = TRUE, error = 0.00001, iter.max = 300, family="ST")
-EnvelopeRMT(est_ST$theta,y,x,cc,family="ST")
+est_N <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.00001, iter.max = 300, family="N")
+est_T <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.00001, iter.max = 300, family="T")
+est_ST <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.00001, iter.max = 300, family="ST")
 
 
 fitT <- CensReg.SMN(cc,x,y,nu=3,cens="left",dist="T",show.envelope="TRUE", error=0.000001 ,iter.max=300)

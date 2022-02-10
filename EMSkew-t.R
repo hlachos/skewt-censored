@@ -3,7 +3,7 @@
 ##                         02/07/2022
 ################################################################################
 
-EM.skewCens <- function(cc, x,y, beta = NULL, sigma2 = NULL, shape = NULL,  nu=NULL, get.init = TRUE, error = 0.00001, iter.max = 100, family="ST"){
+EM.skewCens <- function(cc, x,y, beta = NULL, sigma2 = NULL, shape = NULL,  nu=NULL, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 100, family="ST"){
 
 ## cc is a vector nx1 of left-censoring 0 = uncensoring or 1 = censoring
 ## x is the design matrix of dimension nxp
@@ -145,7 +145,8 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
      
     }
     
-    teta_novo<-matrix(c(beta,sigma2,shape,nu),ncol=1) # to compute the number of parameters
+    teta_novo<- matrix(c(beta,sigma2,shape,nu),ncol=1) # to compute the number of parameters
+   # teta_novo1<- matrix(c(beta,sigma2,shape,nu),ncol=1)
     ############################################################################
     ####### Information Matrix
     ############################################################################
@@ -168,6 +169,10 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       MIE <- MIE1 + MIE
     }
     se <- sqrt(diag(solve(MIE)))
+             if(show.envelope=="TRUE")
+  {
+    envelop <- EnvelopeRMT(teta_novo,y,x,cc,family="ST")
+  }
   }
  ################################################################################
 ###                                     Student-t
@@ -273,8 +278,8 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       
     }
     ychap<-y    ## imputed observed sample
-    teta_novo<-matrix(c(beta,sigma2,0,nu),ncol=1)
-      
+    teta_novo<-matrix(c(beta,sigma2,nu),ncol=1)
+    teta_novo1<-matrix(c(beta,sigma2,0,nu),ncol=1)  
     ####### Information Matrix
     
     sbeta <- c()
@@ -294,6 +299,10 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       MIE <- MIE1 + MIE
     }
     se <- sqrt(diag(solve(MIE)))
+             if(show.envelope=="TRUE")
+  {
+    envelop <- EnvelopeRMT(teta_novo1,y,x,cc,family="ST")
+  }
   }
   
 ################################################################################
@@ -401,7 +410,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
     }
     
     teta_novo<-matrix(c(beta,sigma2,shape),ncol=1)
-    
+  #   teta_novo1<-matrix(c(beta,sigma2,shape),ncol=1)
     ####### Information Matrix
     sbeta <- c()
     ssigma2 <- c()
@@ -422,7 +431,10 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       MIE <- MIE1 + MIE
     }
     se <- sqrt(diag(solve(MIE)))
-    
+          if(show.envelope=="TRUE")
+  {
+    envelop <- EnvelopeRMT(teta_novo,y,x,cc,family="SN")
+  }   
   }
 
 ################################################################################
@@ -529,6 +541,8 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
     }
     ychap<-y 
     teta_novo<-matrix(c(beta,sigma2),ncol=1)
+    teta_novo1<-matrix(c(beta,sigma2,0),ncol=1)
+    
       ####### Information Matrix
     sbeta <- c()
     ssigma2 <- c()
@@ -548,15 +562,19 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       MIE <- MIE1 + MIE
     }
     se <- sqrt(diag(solve(MIE)))    ## standard errors
+         if(show.envelope=="TRUE")
+  {
+    envelop <- EnvelopeRMT(teta_novo1,y,x,cc,family="SN")
   }
   
+  }
+ 
   aic <- -2*lk + 2*length(teta_novo)
   bic <- -2*lk + log(n)*length(teta_novo)
   caic<- -2*lk +(log(n)+1)*length(teta_novo)
-   hq<-  -2*lk+ 2*log(log(n))*length(teta_novo)
-   
-  return(list(theta=teta_novo,Se=se, nu=nu, iter=cont,logver=logver,AIC=aic,BIC=bic,CAIC=caic, HQ=hq, ychap=ychap
-                     ))	
+  hq<-  -2*lk+ 2*log(log(n))*length(teta_novo)
+ 
+  return(list(theta=teta_novo,Se=se, nu=nu, iter=cont,logver=logver,AIC=aic,BIC=bic,CAIC=caic, HQ=hq, ychap=ychap ))	
   }
 
 
