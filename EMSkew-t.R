@@ -48,7 +48,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
     cont <- 0
     criterio <- 1
     lkante   <- 1
-    
+     ychap<-y
     while(criterio > error){
       
       cont <- (cont+1)
@@ -73,7 +73,6 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       E10<-S2
       E20<-S3
       E11<-y*S2
-      ychap<-y
       sigma2s<- nu/(nu+2)*sigma2
       sigma2ss<- nu/((nu+1)*(1+shape^2))*sigma2
       
@@ -90,7 +89,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       for(j in 1:np){      
         A1a<-MomenSNI(mu1[j],sigma2s,shape,nu+2,delta=NULL,Lim1=-Inf,Lim2=y1[j],type="ST") #CalMom(mu,sigma2,nu,y,type)
         A2a<-MomenSNI(mu1[j],sigma2ss,0,nu+1,delta=NULL,Lim1=-Inf,Lim2=y1[j],type="ST")
-        A3a<-MomenSNI(mu1[j],sigma2,0,nu,delta=NULL,Lim1=-Inf,Lim2=y1[j],type="ST")
+        A3a<-MomenSNI(mu1[j],sigma2,shape,nu,delta=NULL,Lim1=-Inf,Lim2=y1[j],type="ST")
         aux1MomW[j,]<-c(A1a$EUY1,A1a$EUY2)
         aux2MomS[j,]<-c(A2a$EUY1,A2a$EUY2)
         aux3MomS[j,]<-c(A3a$EUY1,A3a$EUY2)
@@ -146,7 +145,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
     }
     
     teta_novo<- matrix(c(beta,sigma2,shape,nu),ncol=1) # to compute the number of parameters
-   # teta_novo1<- matrix(c(beta,sigma2,shape,nu),ncol=1)
+      # teta_novo1<- matrix(c(beta,sigma2,shape,nu),ncol=1)
     ############################################################################
     ####### Information Matrix
     ############################################################################
@@ -184,6 +183,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
     criterio <- 1
     lkante   <- 1
     shape<-0
+    ychap<-y
     
     while(criterio > error){
       
@@ -220,19 +220,22 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       mu1<-mu[cc==1]
       y1<-y[cc==1]
       np<-length(mu1)
-      aux1MomW<-aux2MomS<-matrix(0,np,2)
+      aux1MomW<-aux2MomS<-aux3MomS<-matrix(0,np,2)
       
         
       for(j in 1:np){      
-        A1a<-MomenSNI(mu1[j],sigma2s,shape,nu+2,delta=NULL,Lim1=-Inf,Lim2=y1[j],type="ST") #CalMom(mu,sigma2,nu,y,type)
+        A1a<-MomenSNI(mu1[j],sigma2s,0,nu+2,delta=NULL,Lim1=-Inf,Lim2=y1[j],type="ST") #CalMom(mu,sigma2,nu,y,type)
         A2a<-MomenSNI(mu1[j],sigma2ss,0,nu+1,delta=NULL,Lim1=-Inf,Lim2=y1[j],type="ST")
+        A3a<-MomenSNI(mu1[j],sigma2,0,nu,delta=NULL,Lim1=-Inf,Lim2=y1[j],type="ST")
         aux1MomW[j,]<-c(A1a$EUY1,A1a$EUY2)
         aux2MomS[j,]<-c(A2a$EUY1,A2a$EUY2)
-      }
+        aux3MomS[j,]<-c(A3a$EUY1,A3a$EUY2)
+         }
       
       P1aux<-P2aux<-WW<-u
       P1aux[cc==1]<-aux1MomW[,1]
       P2aux[cc==1]<-aux1MomW[,2]
+      
       WW[cc==1]<-aux2MomS[,1]
       
       Wphi<- Aux11/Aux2
@@ -244,7 +247,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       E20Aux<- (Delta/(Gama + Delta^2))^2*(E02Aux-2*E01Aux*mu+mu^2*E00Aux)+Mtij*(Delta/(Gama + Delta^2))*cnu*Wphi*(WW-mu)+ Mtij2
       E11Aux<-Delta/(Gama + Delta^2)*(E02Aux-E01Aux*mu)+ Mtij*Wphi*cnu*WW
       
-      
+      ychap[cc==1]<-aux3MomS[,1] 
       E00[cc==1]<- E00Aux[cc==1]
       E01[cc==1]<- E01Aux[cc==1]
       E02[cc==1]<- E02Aux[cc==1]
@@ -277,7 +280,8 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       
       
     }
-    ychap<-y    ## imputed observed sample
+   
+   
     teta_novo<-matrix(c(beta,sigma2,nu),ncol=1)
     teta_novo1<-matrix(c(beta,sigma2,0,nu),ncol=1)  
     ####### Information Matrix
@@ -315,7 +319,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
     cont <- 0
     criterio <- 1
     lkante   <- 1
-    
+     ychap<-y
     while(criterio > error){
       
       cont <- (cont+1)
@@ -341,7 +345,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       E10<-S2
       E20<-S3
       E11<-y*S2
-      ychap<-y
+      #ychap<-y
       sigma2s<- (1/(1+shape^2))*sigma2
       
       Aux11<-cdfSNI(y, mu, sigma2s, 0, NULL, type = "SN")
@@ -374,7 +378,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       E20Aux<- (Delta/(Gama + Delta^2))^2*(E02Aux-2*E01Aux*mu+mu^2*E00Aux)+Mtij*(Delta/(Gama + Delta^2))*cnu*Wphi*(WW1-mu)+ Mtij2
       E11Aux<-Delta/(Gama + Delta^2)*(E02Aux-E01Aux*mu)+ Mtij*Wphi*cnu*WW1
       
-      ychap[cc==1]<-aux3MomS[,1]
+      #ychap[cc==1]<-aux3MomS[,1]
       E00[cc==1]<- E00Aux[cc==1]
       E01[cc==1]<- E01Aux[cc==1]
       E02[cc==1]<- E02Aux[cc==1]
@@ -408,6 +412,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       
       
     }
+    ychap <- E01
     
     teta_novo<-matrix(c(beta,sigma2,shape),ncol=1)
   #   teta_novo1<-matrix(c(beta,sigma2,shape),ncol=1)
@@ -448,6 +453,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
     criterio <- 1
     lkante   <- 1
     shape<- 0
+    ychap<-y
     while(criterio > error){
       
       cont <- (cont+1)
@@ -539,7 +545,9 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       
      
     }
-    ychap<-y 
+    
+    ychap <- E01
+    #ychap[cc==0]<- mu[cc==0] 
     teta_novo<-matrix(c(beta,sigma2),ncol=1)
     teta_novo1<-matrix(c(beta,sigma2,0),ncol=1)
     
