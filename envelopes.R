@@ -1,10 +1,13 @@
 ##-------------------------------##
 ## Martingale type residual (MT) ##
 ## left censoring
+## ST and ST
+## for normal and T use lambda=0
 ##-------------------------------##
 
-library(PerformanceAnalytics)
 
+if(!require(PerformanceAnalytics)) install.packages("PerformanceAnalytics")
+library(PerformanceAnalytics)
 resMT <- function(theta,y,X,cc,family="ST")
 {
   n <- length(y)

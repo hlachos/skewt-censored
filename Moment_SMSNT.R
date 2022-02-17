@@ -689,36 +689,4 @@ generate_SMSNCR <- function(X,betas,sigma2,lambda,n,cens,perc,dist,nu)
   return(list(y=y,yc=yc,cc=cc))  
 }
 
-###Test
-
-#INV.TST <- function(N,mu,sigma2,lambda, nu, a,b)
-#{
-#  u <- runif(N)
-#  aux <- u*(cdfSNI(b,mu,sigma2,lambda,nu,type="ST") - cdfSNI(a,mu,sigma2,lambda,nu,type="ST")) + cdfSNI(a,mu,sigma2,lambda,nu#,type="ST")     
-#  amostra.x <- qst(aux,xi=mu,omega=sqrt(sigma2), alpha=lambda, nu=nu)
-#  return(amostra.x)
-#}
-
-
- #N <-10000
- #     mu <- 8
- # sigma2 <- 10
- # lambda <- 5
- #  nuSCN <- c(0.5,0.3)
- #     nu <- 5
- #     a  <- -Inf
- #     b  <- 5
- #   type <- "ST"
-
-    #### Teorico
- # Teoric1 <- MomenSNI(mu,sigma2,lambda,nu,delta=NULL,Lim1=a,Lim2=b,type=type)       ### Te?rico
-   
-    
- #   Empir <- INV.TST(N,mu,sigma2,lambda, nu, a=a,b=b)
-    
- #     Emp1 <- mean(Empir)                                                     # 1ro Momento 
- #     Emp2 <- var(Empir) + mean(Empir)^2                                      # 2do Momento 
- #    cbind(Teoric1$EUY1,Emp1)
-  #   cbind(Teoric1$EUY2,Emp2)
-    
 

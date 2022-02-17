@@ -1,6 +1,7 @@
 ################################################################################
-## EM algorithm for estimating the parameters of ST-CR Model
-##                         02/07/2022
+## EM algorithm for estimating the parameters of ST-CR Model  (left censored)
+## For right censored, use -y
+##                         02/17/2022
 ################################################################################
 
 EM.skewCens <- function(cc, x,y, beta = NULL, sigma2 = NULL, shape = NULL,  nu=NULL, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 100, family="ST"){
@@ -582,7 +583,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
   caic<- -2*lk +(log(n)+1)*length(teta_novo)
   hq<-  -2*lk+ 2*log(log(n))*length(teta_novo)
  
-  return(list(theta=teta_novo,Se=se, nu=nu, iter=cont,logver=logver,AIC=aic,BIC=bic,CAIC=caic, HQ=hq, ychap=ychap ))	
+  return(list(theta=teta_novo,Se=se, nu=nu, iter=cont,logver=logver,AIC=aic,BIC=bic,CAIC=caic, HQ=hq, yhat=ychap ))	
   }
 
 
