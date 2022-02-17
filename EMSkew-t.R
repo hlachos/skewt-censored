@@ -540,7 +540,7 @@ if((family != "ST") && (family != "N") && (family != "T") && (family != "SN")) s
       
       lkante <- lk
       
-      if (cont==iter.max){
+      if (cont==iter.max){     
         criterio <- error/10
       }
       
