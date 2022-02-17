@@ -23,11 +23,35 @@ y<-sdata$yc
 cc<-sdata$cc
 
 
+################################################################################
+## EM algorithm with OLS starting values get.init =TRUE (see Subsection 3.1)
+################################################################################
+
 est_ST.EM <- EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="ST")
 est_SN.EM <- EM.skewCens(cc, x, y, get.init = TRUE,  show.envelope="FALSE", error = 0.00001, iter.max = 300, family="SN")
 est_T.EM <- EM.skewCens(cc, x, y, get.init = TRUE,  show.envelope="FALSE", error = 0.00001, iter.max = 300, family="T")
 est_N.EM <- EM.skewCens(cc, x, y, get.init = TRUE,  show.envelope="FALSE", error = 0.00001, iter.max = 300, family="N")
 
+
+
+################################################################################
+###  Random Starting values in the EM algorithm for the ST case
+################################################################################
+
+
+est_ST.EM.Random <- EM.skewCens(cc, x, y, beta = rnorm(3,0,5), sigma2 = rgamma(1,0.1,0.1), shape = rnorm(0,10),  
+                                nu=3, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="ST")
+
+## Comparision between different starting values (OLS and Random)
+
+      df.comp <- data.frame(
+        ThetaTrue    = c(betas,sigma2,shape,nu),
+        est_ST.EM.OLS  = est_ST.EM$theta,
+        est_ST.EM.Random  = est_ST.EM.Random$theta
+         )
+    
+    df.comp
+    
 
 ################################################################################
 ## Comparing SAEM and EM for simulated data (time)
@@ -47,18 +71,25 @@ est_ST.SAEM <- SAEM_EST(y,x,cc,cens="left",LS=NULL,precisao=0.00001,MaxIter=400,
 end_time <- Sys.time()
 T.SAEM<-difftime(end_time, start_time, units = "min")
 
+
 ################################################################################
-## CASE STUDY I      MROZ data
-## library   SMNCensReg firs a CR model with symmetric distributions N, T
+###                     REAL DATA EXAMPLES
+################################################################################
+
+
+################################################################################
+## CASE STUDY I:      Wage rate data
+#  See paper Mattos et al. (2018) and Massuia et al (2017) for details 
 ################################################################################
 
 if(!require(SMNCensReg)) install.packages("SMNCensReg");  library(SMNCensReg)
+## library   SMNCensReg firs a CR model with symmetric distributions N, T
 
 data(wage.rates)
 y <- wage.rates$wage
-x <- cbind(wage.rates$age,wage.rates$educ,wage.rates$kidslt6,wage.rates$kidsge6)
+x <- cbind(1,wage.rates$age,wage.rates$educ,wage.rates$kidslt6,wage.rates$kidsge6)
 cc<- c(rep(0,428),rep(1,325))
-##Fits a left censored Student-t model to the data
+
 
 est_N <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="N")
 est_T <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="T")
@@ -74,9 +105,10 @@ fitN <- CensReg.SMN(cc,x,y,cens="left",dist="Normal",show.envelope="TRUE")
 
 
 ################################################################################
-## CASE STUDY II: See paper Mattos et al. (2018) for details
-## Stellar abundances data
+## CASE STUDY II:    Stellar abundances data
+## See paper Mattos et al. (2018) for details
 ################################################################################
+
 if(!require(astrodatR)) install.packages("astrodatR");  library(astrodatR)
 
 
@@ -93,13 +125,13 @@ est_T <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.0
 est_ST <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.0001, iter.max = 300, family="ST")
 est_SN <-EM.skewCens(cc, x, y, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 300, family="SN")
 
-### symmetric distribution only
+### library   SMNCensReg: symmetric distributions only
 
 fitT <- CensReg.SMN(cc,x,y,nu=3,cens="left",dist="T",show.envelope="TRUE", error=0.000001 ,iter.max=300)
 fitN <- CensReg.SMN(cc,x,y,cens="left",dist="Normal",show.envelope="TRUE")
 
 ################################################################################
-## CASE STUDY III
+## CASE STUDY III: 
 ################################################################################
 
 data(wage.rates)
@@ -115,6 +147,7 @@ est_N <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.0
 est_T <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.00001, iter.max = 300, family="T")
 est_ST <-EM.skewCens(cc, x, y, get.init = TRUE,show.envelope="FALSE", error = 0.00001, iter.max = 300, family="ST")
 
+### library   SMNCensReg: symmetric distributions only
 
 fitT <- CensReg.SMN(cc,x,y,nu=3,cens="left",dist="T",show.envelope="TRUE", error=0.000001 ,iter.max=300)
 fitN <- CensReg.SMN(cc,x,y,cens="left",dist="Normal",show.envelope="TRUE")
