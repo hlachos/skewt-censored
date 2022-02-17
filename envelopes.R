@@ -47,9 +47,9 @@ resMT <- function(theta,y,X,cc,family="ST")
   return(list(resm=resm , resmt=resmt)) 
 }
 
-## ---------------------------------------------------- ##
-## Envelopes of the MT residuals for the SMSN-CR models ##
-## ---------------------------------------------------- ##
+################ ---------------------------------------------------- ##
+############### Envelopes of the MT residuals for the SMSN-CR models ##
+############### ---------------------------------------------------- ##
 
 EnvelopeRMT <- function(theta,y,X,cc,family="ST")
 {

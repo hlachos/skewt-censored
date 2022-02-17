@@ -13,7 +13,7 @@
 #library(mvtnorm)
 #library(mnormt)
 #library(hbmem)
-#library(truncdist)
+#library(truncdist)             
 #library(mnormt)
 #library(sn)
 
@@ -70,8 +70,8 @@ E_Phi <- function(r,a,nu,delta,type=type)
   return(resp)
 }
 
-##################################################
-##################################################
+################################################################################
+################################################################################
 
 E_phi <- function(r,a,nu,delta,type=type)
 {
