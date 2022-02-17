@@ -3,7 +3,7 @@
 
 ##################################################
 ### Aldo M. Garay - V?ctor Hugo Lachos D?vila
-### 09/10
+### 09/10    
 #install.packages("mvtnorm")
 #install.packages("mvnorm")
 #install.packages("hbmem")
