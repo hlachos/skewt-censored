@@ -2,7 +2,7 @@
 ## EM algorithm for estimating the parameters of ST-CR Model  (left censored)
 ## For right censored, use -y
 ##                         02/17/2022
-################################################################################
+#################################################################################
 
 EM.skewCens <- function(cc, x,y, beta = NULL, sigma2 = NULL, shape = NULL,  nu=NULL, get.init = TRUE, show.envelope="FALSE", error = 0.00001, iter.max = 100, family="ST"){
 
