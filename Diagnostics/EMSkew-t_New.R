@@ -52,6 +52,7 @@ EM.skewCens <- function(cc, x, y, beta = NULL, sigma2 = NULL, shape = NULL, nu =
     while(criterio > error){
       
       cont     <- (cont + 1)
+      print(cont)
   
       dj       <- ((y - mu)/sqrt(sigma2))^2
       Mtij2    <- 1/(1 + (Delta^2)*(Gama^(-1)))
@@ -122,7 +123,7 @@ EM.skewCens <- function(cc, x, y, beta = NULL, sigma2 = NULL, shape = NULL, nu =
       shape          <- ((sigma2^(-1/2))*Delta)/(sqrt(1 - (Delta^2)*(sigma2^(-1))))
       
       f <- function(nu){
-        sum(log(dt.ls(y[cc==0], mu[cc==0], sigma2, shape, nu))) + sum(log(cdfSNI(y[cc==1], mu[cc==1], sigma2, shape, nu, type = "ST")))
+        sum(log(dST(cc, y, mu, sigma2, shape, nu)))
       }
       
       nu             <- optimize(f, c(2.01,150), tol = 0.0000000001, maximum = TRUE)$maximum
