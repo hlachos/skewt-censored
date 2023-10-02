@@ -5,10 +5,13 @@
 rm(list=ls(all=TRUE))
 
 source("EMSkew-t_New.R")
+source("EMSkew-t_NewVH.R")
 source("DiagSkew-t_New.R")
 source("Envelopes_New.R")
 source("Moment_SMSNT.R")
 source("Integral_nu_float.R")
+library(MomTrunc)
+
 
 #######################################################################
 ## CASE STUDY I:      Wage rate data
@@ -23,9 +26,26 @@ x  <- cbind(1,PSID1976$age,PSID1976$education,PSID1976$youngkids,PSID1976$experi
 cc <- ifelse(PSID1976$participation=="yes", 0, 1)
 
 est_N  <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "N")
+estM_N  <- EM.skewCensN(cc, x, y, cens="Left", show.envelope = "FALSE", family = "N")
+
 est_SN <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "SN")
+estM_SN <- EM.skewCensM(cc, x, y, cens="Left", show.envelope = "FALSE", family = "SN")
+estMI_SN <- EM.skewCensM(cc, x, y, cens="Interv", LS=rep(Inf,length(y)), show.envelope = "FALSE", family = "SN")
+
+
 est_T  <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "T")
+estM_T  <- EM.skewCensM(cc, x, y, cens="Left", show.envelope = "FALSE", family = "T")
+est_T  <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "T")
+estMI_T  <- EM.skewCensM(cc, x, y, cens="Interv", LS=rep(Inf,length(y)), show.envelope = "FALSE", family = "T")
+
+
+
 est_ST <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "ST")
+estM_ST <- EM.skewCensM(cc, x, y, cens="Left", show.envelope = "FALSE", family = "ST")
+
+estM_ST <- EM.skewCensM(cc, x, y, cens="Interv", LS=rep(Inf,length(y)), show.envelope = "FALSE", family = "ST")
+
+
 
 # Case-deletion
 CD_N   <- CaseDele(cc, x, y,  est_N$theta,  est_N$E00,  est_N$E01,  est_N$E02,  est_N$E10,  est_N$E20,  est_N$E11, family =  "N")
@@ -112,9 +132,22 @@ x1    <- dados$Teff/1000
 x     <- cbind(1, x1)
 
 est_N  <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "N")
+estM_N  <- EM.skewCensM(cc, x, y, cens="Left", show.envelope = "FALSE", family = "N")
+
 est_SN <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "SN")
+estM_SN <- EM.skewCensM(cc, x, y, cens="Left", show.envelope = "FALSE", family = "SN")
+
+
+
 est_T  <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "T")
+estM_T  <- EM.skewCensM(cc, x, y, cens="Left", show.envelope = "FALSE", family = "T")
+
+
 est_ST <- EM.skewCens(cc, x, y, show.envelope = "FALSE", family = "ST")
+estM_ST <- EM.skewCensM(cc, x, y, cens="Left", show.envelope = "FALSE", family = "ST")
+estM1_ST <- EM.skewCensM(cc, -x, -y, cens="Right", show.envelope = "FALSE", family = "ST")
+
+
 
 # Case-deletion
 CD_N   <- CaseDele(cc, x, y,  est_N$theta,  est_N$E00,  est_N$E01,  est_N$E02,  est_N$E10,  est_N$E20,  est_N$E11, family =  "N")
