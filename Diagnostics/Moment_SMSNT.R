@@ -302,6 +302,51 @@ dT <- function(cc, y, mu, sigma2 = 1, nu=4){
 }
 
 
+
+dTMod <- function(cc, y, mu, sigma2 = 1, nu=4, cens="Left", LS=NULL){
+  densN<- vector(mode = "numeric", length = length(y))
+  aux<-(y-mu)/sqrt(sigma2)
+  densN[cc==0] <- dt(aux[cc==0],nu)/sqrt(sigma2)
+   if (cens=="Left"){
+   densN[cc==1]<- pt(aux[cc==1],nu)     
+       }
+   if (cens=="Right"){
+   densN[cc==1]<- 1-pt(aux[cc==1],nu)     
+       }
+  if (cens=="Interv"){
+  aux1<-(LS-mu)/sqrt(sigma2)
+   densN[cc==1]<- pt(aux1[cc==1],nu)-pt(aux[cc==1],nu)     
+       }
+  if(length(which(densN == 0)) > 0) densN[which(densN == 0)] <- .Machine$double.xmin
+  return(densN)
+}
+
+
+dST <- function(cc, y, mu, sigma2 = 1, shape, nu=4){
+  densN<- vector(mode = "numeric", length = length(y))
+  densN[cc==0] <- dt.ls(y[cc==0], mu[cc==0], sigma2, shape, nu ) 
+   densN[cc==1]<- cdfSNI(y[cc==1], mu[cc==1], sigma2, shape, nu, type = "ST")
+  if(length(which(densN == 0)) > 0) densN[which(densN == 0)] <- .Machine$double.xmin
+  return(densN)
+}
+
+dSTMod <- function(cc, y, mu, sigma2 = 1, shape, nu=4, cens="Left", LS=NULL){
+  densN<- vector(mode = "numeric", length = length(y))
+  densN[cc==0] <- dt.ls(y[cc==0], mu[cc==0], sigma2, shape, nu ) 
+   if (cens=="Left"){
+   densN[cc==1]<- cdfSNI(y[cc==1], mu[cc==1], sigma2, shape, nu, type = "ST")     
+       }
+   if (cens=="Right"){
+   densN[cc==1]<- 1-cdfSNI(y[cc==1], mu[cc==1], sigma2, shape, nu, type = "ST")     
+       }
+  if (cens=="Interv"){
+   densN[cc==1]<-pSNI(y[cc==1], LS[cc==1], mu[cc==1], sigma2, shape, nu, type = "ST")
+       }
+  if(length(which(densN == 0)) > 0) densN[which(densN == 0)] <- .Machine$double.xmin
+  return(densN)
+}
+ 
+
 ################################################################
 ##########          Acumuladas das SNI              ############
 ################################################################
@@ -347,7 +392,7 @@ cdfSNI<- function(x, mu, sigma2, lambda, nu, type = "SN"){
       MU <- cbind(mu, 0)
     }
     Y <- cbind(x, 0)
-    #nu <- round(nu)
+    
     if(nu%%1 == 0){
       #nu integer
       for (i in 1:n){
@@ -356,11 +401,11 @@ cdfSNI<- function(x, mu, sigma2, lambda, nu, type = "SN"){
     }else{
       #nu decimal
       for (i in 1:n) {
-        resp[i] <- 2 * acumt2(a = NULL,b = Y[i, ],mu = MU[i, ],Sigma = SIGMA,nu = nu)
+        resp[i] <- 2 * acumt2(a = NULL, b = Y[i, ],mu = MU[i, ],Sigma = SIGMA, nu = nu)
       }
-    }
-    return(resp)
-    
+      }
+    return(resp) 
+  
   }
   if (type == "SSL") {
     cdf <- function(y) {
@@ -377,6 +422,70 @@ cdfSNI<- function(x, mu, sigma2, lambda, nu, type = "SN"){
 # cdfSNI(c(1,2,3), 2, 3, 2.5, nu = 4, type = "ST")
 # cdfSNI(c(1,2,3), 2, 3, 2.5, nu = 4.56, type = "ST")
 # cdfSNI(c(1,2,3), 2, 3, 2.5, nu = 5, type = "ST")
+
+pSNI<- function(LI, LS, mu, sigma2, lambda, nu, type = "SN"){
+                #lI: Inferior Limit
+                #lS: Superior Limit
+  n <- length(LI)
+  resp <- matrix(0, n, 1)
+  if (type == "N") {
+    resp <- pnorm((LS - mu)/sqrt(sigma2))-pnorm((LI - mu)/sqrt(sigma2))
+    return(resp)
+  }
+  
+  if (type == "T") {
+    resp <- pt((LS - mu)/sqrt(sigma2), df = nu)-pt((LI - mu)/sqrt(sigma2), df = nu)
+    return(resp)
+  }
+  
+  if (type == "SN") {
+    delta <- lambda/sqrt(1 + lambda^2)
+    SIGMA <- matrix(c(sigma2, -delta * sqrt(sigma2), -delta * sqrt(sigma2), 
+                      1), byrow = TRUE, ncol = 2, nrow = 2)
+    if (length(mu) == 1) {
+      MU <- cbind(rep(mu, n), 0)
+    }
+    if (length(mu) == n) {
+      MU <- cbind(mu, 0)
+    }
+    YI <- cbind(LI, 0)
+    YI[LI==-Inf,]<-c(-Inf,-Inf)
+    YS <- cbind(LS, 0)
+    YS[LS==Inf,]<-c(Inf,Inf)
+    for (i in 1:n) {
+      resp[i] <- 2 * (mnormt::pmnorm(x = YS[i, ], mean = MU[i, ], varcov = SIGMA)-mnormt::pmnorm(x = YI[i, ], mean = MU[i, ], varcov = SIGMA))
+    }
+    return(resp)
+  }
+  
+  if (type == "ST") {
+    delta <- lambda/sqrt(1 + lambda^2)
+    SIGMA <- matrix(c(sigma2, -delta * sqrt(sigma2), -delta * sqrt(sigma2), 
+                      1), byrow = TRUE, ncol = 2, nrow = 2)
+    if (length(mu) == 1) {
+      MU <- cbind(rep(mu, n), 0)
+    }
+    if (length(mu) == n) {
+      MU <- cbind(mu, 0)
+    }
+    YI <- cbind(LI, 0)
+    YI[LI==-Inf,]<-c(-Inf,-Inf)
+    YS <- cbind(LS, 0)
+    YS[LS==Inf,]<-c(Inf,Inf)
+    if(nu%%1 == 0){
+      #nu integer
+      for (i in 1:n){
+        resp[i] <- 2 * (mnormt::pmt(x=YS[i, ], mean = MU[i, ], S = SIGMA, df = nu)-mnormt::pmt(x=YI[i, ], mean = MU[i, ], S = SIGMA, df = nu))
+      }
+    }else{
+      #nu decimal
+      for (i in 1:n){
+        resp[i] <- 2 * (acumt2(a = NULL, b = c(YS[i, ]-MU[i, ]), mu =c(0,0) ,Sigma = SIGMA, nu = nu)-acumt2(a = NULL, b = c(YI[i, ]-MU[i, ]),mu = c(0,0), Sigma = SIGMA, nu = nu))
+      }
+      }
+    return(resp) 
+  }
+}
 
 
 ################################################################################
@@ -688,3 +797,108 @@ generate_SMSNCR <- function(X,betas,sigma2,lambda,n,cens,perc,dist,nu)
   }    
   return(list(y=y,yc=yc,cc=cc))  
 }
+
+MomenSNI2023 <- function(mu,sigma2,lambda,nu,delta,Lim1,Lim2,type)
+  {
+    Lim11 <- (Lim1-mu)/sqrt(sigma2)
+    Lim21 <- (Lim2-mu)/sqrt(sigma2)
+        b <- sqrt(2/pi)
+        n <- length(Lim11)
+  lambda1 <- sqrt(1+lambda^2)
+ Slambda1 <- b*lambda/(lambda1)^2
+    if(type=="SN")
+    {
+     type1 <- "N"
+      EU <-  1
+    #  FNIb   <-  cdfSNI(Lim21,mu=0,sigma2=1,lambda,nu=NULL,type="SN")
+    #  FNIa   <-  cdfSNI(Lim11,mu=0,sigma2=1,lambda,nu=NULL,type="SN")
+    }
+    if(type=="ST")
+    {
+   type1 <- "T"
+    #  FNIb   <-  cdfSNI(Lim21,mu=0,sigma2=1,lambda,nu,type="ST")
+    #  FNIa   <-  cdfSNI(Lim11,mu=0,sigma2=1,lambda,nu,type="ST")
+    }
+    if(type=="SSL")
+    {
+       type1 <- "SL"
+    # FNIb   <- cdfSNI(Lim21,mu=0,sigma2=1,lambda,nu,type="SSL")
+    #  FNIa   <- cdfSNI(Lim11,mu=0,sigma2=1,lambda,nu,type="SSL")
+    }
+    if(type=="SCN")
+    {
+       type1 <- "CN"
+    #      EU <- (nu[1]*nu[2]) + (1-nu[1])
+    #  FNIb   <- cdfSNI(Lim21,mu=0,sigma2=1,lambda,nu,type="SCN")
+    #  FNIa   <- cdfSNI(Lim11,mu=0,sigma2=1,lambda,nu,type="SCN")
+    }
+    if(Lim11==-Inf)
+     {
+      FNIa <- 0
+        S4 <- (Lim21)*E_phiSNI(-0.5,Lim21,nu,delta=NULL,lambda,type=type)
+#        S7 <- (Lim21^2)*E_phiSNI(-0.5,Lim21,nu,delta=NULL,lambda,type=type)
+#        S9 <- ((b*lambda/lambda1^2))*(Lim21*E_phi(-1,Lim21*lambda1,nu,delta,type=type1))
+#       S15 <- (Lim21)*E_phiSNI(-1.5,Lim21,nu,delta=NULL,lambda,type=type)
+#       S16 <- (Lim21)^3*E_phiSNI(-0.5,Lim21,nu,delta=NULL,lambda,type=type)
+#       S18 <- ((b*lambda/lambda1^2))*((Lim21)^2*E_phi(-1,Lim21*lambda1,nu,delta,type=type1))
+     }
+    else
+     {
+      FNIa <- cdfSNI(Lim11,mu=0,sigma2=1,lambda,nu=nu,type=type)
+     }
+    if(Lim21==Inf)
+     {
+       FNIb <- 1
+         S4 <- - (Lim11)*E_phiSNI(-0.5,Lim11,nu,delta=NULL,lambda,type=type)
+#         S7 <- - (Lim11^2)*E_phiSNI(-0.5,Lim11,nu,delta=NULL,lambda,type=type)
+#         S9 <- - -((b*lambda/lambda1^2))*(Lim11*E_phi(-1,Lim11*lambda1,nu,delta,type=type1))
+#        S15 <- - (Lim11)*E_phiSNI(-1.5,Lim11,nu,delta=NULL,lambda,type=type)
+#        S16 <- - (Lim11)^3*E_phiSNI(-0.5,Lim11,nu,delta=NULL,lambda,type=type)
+#        S18 <- - -((b*lambda/lambda1^2))*((Lim11)^2*E_phi(-1,Lim11*lambda1,nu,delta,type=type1))
+     }
+    else
+     {
+        FNIb <- cdfSNI(Lim21,mu=0,sigma2=1,lambda,nu,type=type)
+     }
+       K <- 1/(FNIb-FNIa)
+      S0 <- (b*lambda/lambda1)*(E_Phi(-0.5,Lim21*lambda1, nu,delta,type=type1)- E_Phi(-0.5,Lim11*lambda1, nu,delta,type=type1))
+      S1 <- E_phiSNI(-0.5,Lim21,nu,delta=NULL,lambda,type=type)- E_phiSNI(-0.5,Lim11,nu,delta=NULL,lambda,type=type)
+      S2 <- E_PhiSNI(-1,Lim21,nu,delta,lambda,type=type)- E_PhiSNI(-1,Lim11,nu,delta,lambda,type=type)
+      S3 <- Slambda1*(E_phi(-1,Lim21*lambda1,nu,delta,type=type1)-E_phi(-1,Lim11*lambda1,nu,delta,type=type1))
+###########
+#      S5 <- E_phiSNI(-1.5,Lim21,nu,delta=NULL,lambda,type=type)- E_phiSNI(-1.5,Lim11,nu,delta=NULL,lambda,type=type)
+#      S6 <- (b*lambda/lambda1)*(E_Phi(-1.5,Lim21*lambda1, nu,delta,type=type1)- E_Phi(-1.5,Lim11*lambda1, nu,delta,type=type1))
+#      S8 <- ((b*lambda/lambda1^3))*(E_Phi(-1.5,Lim21*lambda1, nu,delta,type=type1)- E_Phi(-1.5,Lim11*lambda1, nu,delta,type=type1))
+###########
+#     S13<- E_PhiSNI(-2,Lim21,nu,delta,lambda,type=type)- E_PhiSNI(-2,Lim11,nu,delta,lambda,type=type)
+#     S14<- (b*lambda/lambda1^2)*(E_phi(-2,Lim21*lambda1,nu,delta,type=type1)-E_phi(-2,Lim11*lambda1,nu,delta,type=type1))
+#     S17<-  ((b*lambda/lambda1^4))*(E_phi(-2,Lim21*lambda1,nu,delta,type=type1)-E_phi(-2,Lim11*lambda1,nu,delta,type=type1))
+###########
+if(setequal(Lim11,-Inf)== FALSE & setequal(Lim21,Inf)== FALSE)
+{
+  S4 <- (Lim21)*E_phiSNI(-0.5,Lim21,nu,delta=NULL,lambda,type=type)- (Lim11)*E_phiSNI(-0.5,Lim11,nu,delta=NULL,lambda,type=type)
+#  S7 <- (Lim21^2)*E_phiSNI(-0.5,Lim21,nu,delta=NULL,lambda,type=type)- (Lim11^2)*E_phiSNI(-0.5,Lim11,nu,delta=NULL,lambda,type=type)
+#  S9 <- ((b*lambda/lambda1^2))*(Lim21*E_phi(-1,Lim21*lambda1,nu,delta,type=type1)-Lim11*E_phi(-1,Lim11*lambda1,nu,delta,type=type1))
+# S15 <- (Lim21)*E_phiSNI(-1.5,Lim21,nu,delta=NULL,lambda,type=type)-(Lim11)*E_phiSNI(-1.5,Lim11,nu,delta=NULL,lambda,type=type)
+# S16 <- (Lim21)^3*E_phiSNI(-0.5,Lim21,nu,delta=NULL,lambda,type=type)-(Lim11)^3*E_phiSNI(-0.5,Lim11,nu,delta=NULL,lambda,type=type)
+# S18 <- ((b*lambda/lambda1^2))*((Lim21)^2*E_phi(-1,Lim21*lambda1,nu,delta,type=type1)-(Lim11)^2*E_phi(-1,Lim11*lambda1,nu,delta,type=type1))
+}
+# Saux1<- 3*(S13-S14-S15)
+# Saux2<- 2*S17+S18
+    ####
+    EUX1 <- K*(S0-S1)
+    EUX2 <- K*(S2-S3-S4)
+#    EUX3 <- K*(2*(-S5+S6)-S7+S8-S9)
+#    EUX4 <- K*(Saux1-S16-Saux2)
+   sigma <- sqrt(sigma2)
+    EUY1 <- mu + sigma*EUX1
+    EUY2 <- mu^2 + 2*mu*sigma*EUX1 + (sigma^2)*EUX2
+#   EUY3 <- mu^3 + 3*(mu^2)*sigma*EUX1 + 3*mu*(sigma^2)*EUX2 + (sigma^3)*EUX3
+#   EUY4 <- (mu^4) +  4*(mu^3)*sigma*EUX1 + 6*(mu^2)*(sigma^2)*EUX2 + 4*mu*(sigma^3)*EUX3 + (sigma^4)*EUX4
+#  Skewn <- (EUY3-3*EUY1*EUY2+2*EUY1^3)/(EUY2-EUY1^2)^(1.5)
+#    Kurt <- (EUY4-4*EUY1*EUY3+6*EUY2*EUY1^2-3*EUY1^4)/(EUY2-EUY1^2)^2
+  # return(list(EUY1=EUY1,EUY2=EUY2,EUY3=EUY3,EUY4=EUY4,Skewn=Skewn,Kurt=Kurt))
+    return(list(EUY1=EUY1,EUY2=EUY2))
+    }
+
+
