@@ -42,10 +42,10 @@ acumt2 = function(a = NULL,b,mu,Sigma,nu){
 # b = c(2,3)
 # mu = as.matrix(c(1,2))
 # Sigma = matrix(c(2,-0.5,-0.5,1),2,2)
-# 
-# nu = 3
+ 
+# nu = 3.2
 # acumt2(a,b,mu,Sigma,nu)
-# pmvt(lower = c(a-mu),upper = c(b-mu),df = nu,sigma = Sigma)[1]
+# tlrmvnmvt::pmvt(lower = c(a-mu),upper = c(b-mu),df = nu,sigma = Sigma)[1]
 
 # 
 # nu = 3.27
@@ -57,3 +57,4 @@ acumt2 = function(a = NULL,b,mu,Sigma,nu){
 # acumt2(a,b,mu,Sigma,nu)
 # #or a = NULL
 # acumt2(b = b,mu = mu,Sigma = Sigma,nu = nu)
+# tlrmvnmvt::pmvt(lower = c(a-mu),upper = c(b-mu),df = nu,sigma = Sigma)[1]
